@@ -1,7 +1,7 @@
 package world;
 
 import io.opentracing.Span;
-import io.opentracing.util.GlobalTracer;
+import io.opentracing.Scope;
 
 import com.uber.jaeger.Configuration;
 import com.uber.jaeger.Configuration.ReporterConfiguration;
@@ -26,17 +26,28 @@ public class Hello {
         this.tracer = tracer;
     }
 
+    private  String formatString(String helloTo) {
+        try (Scope scope = tracer.buildSpan("formatString").startActive(true)) {
+            String helloStr = String.format("Hello, %s!", helloTo);
+            scope.span().log(ImmutableMap.of("event", "string-format", "value", helloStr));
+            return helloStr;
+        }
+    }
+    
+    private void printHello(String helloStr) {
+        try (Scope scope = tracer.buildSpan("printHello").startActive(true)) {
+            System.out.println(helloStr);
+            scope.span().log(ImmutableMap.of("event", "println"));
+        }
+    }
+
     private void sayHello(String helloTo) {
-        Span span = tracer.buildSpan("say-hello").startManual();
-        span.setTag("hello-to", helloTo);
-
-        String helloStr = String.format("Hello, %s!", helloTo);
-        span.log(ImmutableMap.of("event", "string-format", "value", helloStr));
-        
-        System.out.println(helloStr);
-        span.log(ImmutableMap.of("event", "println"));
-
-        span.finish();
+        try (Scope scope = tracer.buildSpan("say-hello").startActive(true)) {
+            scope.span().setTag("hello-to", helloTo);
+            
+            String helloStr = formatString(helloTo);
+            printHello(helloStr);
+        }
     }
 
     public static void main(String[] args) {
