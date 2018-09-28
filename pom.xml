@@ -8,6 +8,11 @@
     <version>1.0.0</version>
 
     <dependencies>
+        <dependency>
+            <groupId>com.uber.jaeger</groupId>
+            <artifactId>jaeger-core</artifactId>
+            <version>0.26.0</version>
+        </dependency>
     </dependencies>
 
     <properties>
