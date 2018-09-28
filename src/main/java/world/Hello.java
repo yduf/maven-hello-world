@@ -9,6 +9,9 @@ import com.uber.jaeger.Configuration.SamplerConfiguration;
 
 import com.uber.jaeger.Tracer;
 
+import com.google.common.collect.ImmutableMap;
+
+
 public class Hello {
     private final io.opentracing.Tracer tracer;
 
@@ -25,9 +28,13 @@ public class Hello {
 
     private void sayHello(String helloTo) {
         Span span = tracer.buildSpan("say-hello").startManual();
+        span.setTag("hello-to", helloTo);
 
         String helloStr = String.format("Hello, %s!", helloTo);
+        span.log(ImmutableMap.of("event", "string-format", "value", helloStr));
+        
         System.out.println(helloStr);
+        span.log(ImmutableMap.of("event", "println"));
 
         span.finish();
     }
